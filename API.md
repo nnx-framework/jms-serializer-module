@@ -12,3 +12,5 @@
 
 
 # Настройка модуля nnx_jms_serializer
+
+
