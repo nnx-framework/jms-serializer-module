@@ -1,0 +1,7 @@
+docs_dir: doc/book/ru
+pages:
+    - index.md
+site_name: JmsSerializerModule
+site_description: 'Работа jms serializer'
+repo_url: 'https://github.com/nnx-framework/jms-serializer-module'
+copyright: 'Copyright (c) 2016 <a href="https://github.com/nnx-framework">NNX</a>'

@@ -1,0 +1,11 @@
+<?php
+/**
+ * @link    https://github.com/nnx-framework/jms-serializer-module
+ * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
+ */
+
+return [
+    'nnx_jms_serializer' => [
+
+    ]
+];
