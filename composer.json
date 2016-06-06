@@ -1,6 +1,6 @@
 {
-  "name": "nnx/doctrine-fixture-module",
-  "description": "Doctrine Fixture Module",
+  "name": "nnx/jms-serializer-module",
+  "description": "Jms Serializer Module",
   "type": "library",
   "keywords": [
     "zf2",
