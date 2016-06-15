@@ -55,7 +55,7 @@ class SerializerOptions extends AbstractOptions
      *
      * @var string
      */
-    protected $dispatcher;
+    protected $eventDispatcher;
 
     /**
      * Имя сервиса отвечающего за парсинг типов данных
@@ -189,21 +189,21 @@ class SerializerOptions extends AbstractOptions
      *
      * @return string
      */
-    public function getDispatcher()
+    public function getEventDispatcher()
     {
-        return $this->dispatcher;
+        return $this->eventDispatcher;
     }
 
     /**
      * Устанавливает имя сервиса отвечающего за диспетчирезацию событий
      *
-     * @param string $dispatcher
+     * @param string $eventDispatcher
      *
      * @return $this
      */
-    public function setDispatcher($dispatcher)
+    public function setEventDispatcher($eventDispatcher)
     {
-        $this->dispatcher = $dispatcher;
+        $this->eventDispatcher = $eventDispatcher;
 
         return $this;
     }

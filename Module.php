@@ -5,7 +5,9 @@
  */
 namespace Nnx\JmsSerializerModule;
 
+use Nnx\ModuleOptions\ModuleConfigKeyProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\DependencyIndicatorInterface;
 use Zend\ModuleManager\Listener\ServiceListenerInterface;
 use Zend\ModuleManager\ModuleManager;
 use Zend\ModuleManager\ModuleManagerInterface;
@@ -16,7 +18,7 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\InitProviderInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-
+use Nnx\ModuleOptions\Module as ModuleOptions;
 
 /**
  * Class Module
@@ -27,7 +29,9 @@ class Module implements
     BootstrapListenerInterface,
     AutoloaderProviderInterface,
     InitProviderInterface,
-    ConfigProviderInterface
+    ConfigProviderInterface,
+    ModuleConfigKeyProviderInterface,
+    DependencyIndicatorInterface
 {
     /**
      * Имя секции в конфиги приложения отвечающей за настройки модуля
@@ -37,11 +41,41 @@ class Module implements
     const CONFIG_KEY = 'nnx_jms_serializer';
 
     /**
+     * Имя секции в конфиги приложения отвечающей за настройки сервис менеджера для данного модуля
+     *
+     * @var string
+     */
+    const MODULE_SERVICE_MANAGER_CONFIG_KEY = 'nnx_jms_serializer_service';
+
+
+    /**
      * Имя модуля
      *
      * @var string
      */
     const MODULE_NAME = __NAMESPACE__;
+
+
+    /**
+     * @inheritDoc
+     */
+    public function getModuleDependencies()
+    {
+        return [
+            ModuleOptions::MODULE_NAME
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @return string
+     */
+    public function getModuleConfigKey()
+    {
+        return static::CONFIG_KEY;
+    }
+
 
     /**
      * @param ModuleManagerInterface $manager
@@ -52,7 +86,7 @@ class Module implements
     public function init(ModuleManagerInterface $manager)
     {
         if (!$manager instanceof ModuleManager) {
-            $errMsg =sprintf('Module manager not implement %s', ModuleManager::class);
+            $errMsg = sprintf('Module manager not implement %s', ModuleManager::class);
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
@@ -71,7 +105,6 @@ class Module implements
         }
 
 
-
     }
 
     /**
@@ -86,7 +119,7 @@ class Module implements
     public function onBootstrap(EventInterface $e)
     {
         /** @var MvcEvent $e */
-        $eventManager        = $e->getApplication()->getEventManager();
+        $eventManager = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
 
@@ -117,7 +150,9 @@ class Module implements
     {
         return array_merge_recursive(
             include __DIR__ . '/config/module.config.php',
-            include __DIR__ . '/config/serviceManager.config.php'
+            include __DIR__ . '/config/serviceManager.config.php',
+            include __DIR__ . '/config/serializer.config.php',
+            include __DIR__ . '/config/moduleServiceManager.config.php'
         );
     }
 

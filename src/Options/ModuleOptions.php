@@ -26,7 +26,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
     /**
      * Конфиги сериалайзеров
      *
-     * @var SerializerOptions[]
+     * @var SerializerPluginOptions[]
      */
     protected $serializersOptions = [];
 
@@ -40,7 +40,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
     /**
      * Конфиги для фабрик метаданных
      *
-     * @var PluginOptions[]
+     * @var MetadataFactoryPluginOptions[]
      */
     protected $metadataFactoriesOptions = [];
 
@@ -114,20 +114,54 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      */
     protected $eventDispatchersOptions = [];
 
+    /**
+     * Имя сервиса для получения кеша доктрины
+     *
+     * @var string
+     */
+    protected $annotationCache;
 
     /**
-     * Набор данных описывающих парсеры типов
+     * Данные описывающие FileLocator используемые в драйверах метаданных
      *
      * @var array
      */
-    protected $typeParsers = [];
+    protected $fileLocators = [];
 
     /**
-     * Устанавливает конфиги описывающие парсеры типов данных
+     * Конфиги описывающие FileLocator используемые в драйверах метаданных
+     *
+     * @var PluginOptions[]
+     */
+    protected $fileLocatorsOptions = [];
+
+    /**
+     * Данные описывающие Visitor'ы
      *
      * @var array
      */
-    protected $typeParsersOptions = [];
+    protected $visitors = [];
+
+    /**
+     * Конфиги описывающие Visitor'ы
+     *
+     * @var PluginOptions[]
+     */
+    protected $visitorsOptions = [];
+
+    /**
+     * Настройки стратегий для работы с именами свойств объектов
+     *
+     * @var array
+     */
+    protected $namingStrategies = [];
+
+    /**
+     * Конфиги стратегий для работы с именами свойств объектов
+     *
+     * @var PluginOptions[]
+     */
+    protected $namingStrategiesOptions = [];
 
     /**
      * Устанавливает информацию о сериалайзерах
@@ -149,7 +183,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $serializerName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasSerializer($serializerName)
     {
@@ -161,7 +195,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param $serializerName
      *
-     * @return SerializerOptions
+     * @return SerializerPluginOptions
      * @throws \Nnx\JmsSerializerModule\Options\Exception\InvalidArgumentException
      */
     public function getSerializer($serializerName)
@@ -175,7 +209,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
-        $this->serializersOptions[$serializerName] = new SerializerOptions($this->serializers[$serializerName]);
+        $this->serializersOptions[$serializerName] = new SerializerPluginOptions($this->serializers[$serializerName]);
 
         return $this->serializersOptions[$serializerName];
     }
@@ -201,7 +235,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $metadataFactoryName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasMetadataFactory($metadataFactoryName)
     {
@@ -213,7 +247,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param $metadataFactoryName
      *
-     * @return PluginOptions
+     * @return MetadataFactoryPluginOptions
      * @throws \Nnx\JmsSerializerModule\Options\Exception\InvalidArgumentException
      */
     public function gasMetadataFactory($metadataFactoryName)
@@ -227,7 +261,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
-        $this->metadataFactoriesOptions[$metadataFactoryName] = new PluginOptions($this->metadataFactories[$metadataFactoryName]);
+        $this->metadataFactoriesOptions[$metadataFactoryName] = new MetadataFactoryPluginOptions($this->metadataFactories[$metadataFactoryName]);
 
         return $this->metadataFactoriesOptions[$metadataFactoryName];
     }
@@ -252,7 +286,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $handlerRegistryName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasHandlerRegistry($handlerRegistryName)
     {
@@ -278,7 +312,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
-        $this->handlerRegistriesOptions[$handlerRegistryName] = new PluginOptions($this->handlerRegistriesOptions[$handlerRegistryName]);
+        $this->handlerRegistriesOptions[$handlerRegistryName] = new PluginOptions($this->handlerRegistries[$handlerRegistryName]);
 
         return $this->handlerRegistriesOptions[$handlerRegistryName];
     }
@@ -304,7 +338,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $metadataDriverName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasMetadataDriver($metadataDriverName)
     {
@@ -356,7 +390,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $objectConstructorName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasObjectConstructor($objectConstructorName)
     {
@@ -407,7 +441,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $serializationVisitorName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasSerializationVisitor($serializationVisitorName)
     {
@@ -452,7 +486,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $deserializationVisitorName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasDeserializationVisitor($deserializationVisitorName)
     {
@@ -497,7 +531,7 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
      *
      * @param string $eventDispatcherName
      *
-     * @return $this
+     * @return boolean
      */
     public function hasEventDispatcher($eventDispatcherName)
     {
@@ -529,54 +563,181 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
     }
 
     /**
-     * Устанавливает набор данных описывающих парсеры типов
+     * Возвращает сервиса для получения кеша доктрины
      *
-     * @param array $typeParsers
+     * @return string
+     */
+    public function getAnnotationCache()
+    {
+        return $this->annotationCache;
+    }
+
+    /**
+     * Устанавливает имя сервиса для получения кеша доктрины
+     *
+     * @param string $annotationCache
      *
      * @return $this
      */
-    public function setTypeParsers(array $typeParsers)
+    public function setAnnotationCache($annotationCache)
     {
-        $this->typeParsers = $typeParsers;
-        $this->typeParsersOptions = [];
+        $this->annotationCache = $annotationCache;
+
+        return $this;
+    }
+
+    /**
+     * Устанавливает данные описывающие FileLocator используемые в драйверах метаданных
+     *
+     * @param array $fileLocators
+     *
+     * @return $this
+     */
+    public function setFileLocators(array $fileLocators)
+    {
+        $this->fileLocators = $fileLocators;
+        $this->fileLocatorsOptions = [];
+
+        return $this;
+    }
+
+    /**
+     * Проверяет есть ли FileLocator  с заданным именем
+     *
+     * @param string $fileLocatorName
+     *
+     * @return boolean
+     */
+    public function hasFileLocator($fileLocatorName)
+    {
+        return array_key_exists($fileLocatorName, $this->fileLocators);
+    }
+
+    /**
+     * Возвращает FileLocator с заданным именем
+     *
+     * @param $fileLocatorName
+     *
+     * @return PluginOptions
+     * @throws \Nnx\JmsSerializerModule\Options\Exception\InvalidArgumentException
+     */
+    public function getFileLocator($fileLocatorName)
+    {
+        if (array_key_exists($fileLocatorName, $this->fileLocatorsOptions)) {
+            return $this->fileLocatorsOptions[$fileLocatorName];
+        }
+
+        if (!$this->hasFileLocator($fileLocatorName)) {
+            $errMsg = sprintf('File locator %s not found', $fileLocatorName);
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
+        $this->fileLocatorsOptions[$fileLocatorName] = new PluginOptions($this->fileLocators[$fileLocatorName]);
+
+        return $this->fileLocatorsOptions[$fileLocatorName];
+    }
+
+    /**
+     * Устанавливает данные описывающие Visitor'ы
+     *
+     * @param array $visitors
+     *
+     * @return $this
+     */
+    public function setVisitors(array $visitors)
+    {
+        $this->visitors = $visitors;
+        $this->visitorsOptions = [];
+
+        return $this;
+    }
+
+    /**
+     * Проверяет есть ли Visitor  с заданным именем
+     *
+     * @param string $visitorName
+     *
+     * @return boolean
+     */
+    public function hasVisitor($visitorName)
+    {
+        return array_key_exists($visitorName, $this->visitors);
+    }
+
+    /**
+     * Возвращает Visistor с заданным именем
+     *
+     * @param $visitorName
+     *
+     * @return PluginOptions
+     * @throws \Nnx\JmsSerializerModule\Options\Exception\InvalidArgumentException
+     */
+    public function getVisitor($visitorName)
+    {
+        if (array_key_exists($visitorName, $this->visitorsOptions)) {
+            return $this->visitorsOptions[$visitorName];
+        }
+
+        if (!$this->hasVisitor($visitorName)) {
+            $errMsg = sprintf('Visitor %s not found', $visitorName);
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
+        $this->visitorsOptions[$visitorName] = new PluginOptions($this->visitors[$visitorName]);
+
+        return $this->visitorsOptions[$visitorName];
+    }
+
+    /**
+     * Устанавливает настройки стратегий для работы с именами свойств объектов
+     *
+     * @param array $namingStrategies
+     *
+     * @return $this
+     */
+    public function setNamingStrategies(array $namingStrategies)
+    {
+        $this->namingStrategies = $namingStrategies;
+        $this->namingStrategiesOptions = [];
 
         return $this;
     }
 
 
     /**
-     * Проверяет есть ли парсер типов  с заданным именем
+     * Проверяет есть ли стратегия  с заданным именем
      *
-     * @param string $typeParserName
+     * @param string $strategyName
      *
-     * @return $this
+     * @return boolean
      */
-    public function hasTypeParser($typeParserName)
+    public function hasNamingStrategy($strategyName)
     {
-        return array_key_exists($typeParserName, $this->typeParsers);
+        return array_key_exists($strategyName, $this->namingStrategies);
     }
 
+
     /**
-     * Возвращает парсер типов с заданным именем
+     * Возвращает стратегию с заданным именем
      *
-     * @param $typeParserName
+     * @param $strategyName
      *
      * @return PluginOptions
      * @throws \Nnx\JmsSerializerModule\Options\Exception\InvalidArgumentException
      */
-    public function getTypeParser($typeParserName)
+    public function getNamingStrategy($strategyName)
     {
-        if (array_key_exists($typeParserName, $this->typeParsersOptions)) {
-            return $this->typeParsersOptions[$typeParserName];
+        if (array_key_exists($strategyName, $this->namingStrategiesOptions)) {
+            return $this->namingStrategiesOptions[$strategyName];
         }
 
-        if (!$this->hasTypeParser($typeParserName)) {
-            $errMsg = sprintf('Type parser %s not found', $typeParserName);
+        if (!$this->hasNamingStrategy($strategyName)) {
+            $errMsg = sprintf('Naming strategy %s not found', $strategyName);
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
-        $this->typeParsersOptions[$typeParserName] = new PluginOptions($this->typeParsers[$typeParserName]);
+        $this->namingStrategiesOptions[$strategyName] = new PluginOptions($this->namingStrategies[$strategyName]);
 
-        return $this->typeParsersOptions[$typeParserName];
+        return $this->namingStrategiesOptions[$strategyName];
     }
 }

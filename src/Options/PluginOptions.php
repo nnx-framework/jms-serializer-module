@@ -26,7 +26,7 @@ class PluginOptions extends AbstractOptions
      *
      * @var array
      */
-    protected $options;
+    protected $options = [];
 
     /**
      * Возвращает имя плагина
@@ -69,7 +69,7 @@ class PluginOptions extends AbstractOptions
      *
      * @return $this
      */
-    public function setOptions($options)
+    public function setOptions(array $options)
     {
         $this->options = $options;
 

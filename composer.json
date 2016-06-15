@@ -23,7 +23,14 @@
     "zendframework/zend-eventmanager": "~2.4.0",
     "zendframework/zend-stdlib": "~2.4.0",
     "zendframework/zend-servicemanager": "~2.4.0",
-    "jms/serializer": "~1.1.0"
+    "zendframework/zend-serializer": "~2.4.0",
+    "doctrine/annotations": "~1.2.7",
+    "doctrine/common": "~2.5.0",
+
+    "jms/serializer": "~1.1.0",
+    "jms/metadata": "~1.5.1",
+
+    "phpcollection/phpcollection": "~0.4.0"
   },
   "require-dev": {
     "fabpot/php-cs-fixer": "~1.11.0",
@@ -34,9 +41,19 @@
     "zendframework/zend-config": "~2.4.0",
     "zendframework/zend-test": "~2.4.0",
     "zendframework/zend-loader": "~2.4.0",
-    "zendframework/zend-serializer": "~2.4.0",
+
     "zendframework/zend-log": "~2.4.0",
-    "zendframework/zend-i18n": "~2.4.0"
+    "zendframework/zend-i18n": "~2.4.0",
+    "doctrine/doctrine-module": "~1.0.0",
+
+    "nnx/doctrine": "~0.1.23",
+
+
+    "nnx/zf2-test-toolkit": "~0.1.7"
+  },
+  "suggest": {
+    "doctrine/doctrine-module": "Use module for caching annotation",
+    "nnx/doctrine": "Use to create a ManagerRegistry"
   },
   "autoload": {
     "psr-4": {
