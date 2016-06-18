@@ -6,7 +6,7 @@
 namespace Nnx\JmsSerializerModule\PhpUnit\TestData\DefaultApp;
 
 use Nnx\JmsSerializerModule\PhpUnit\TestData\TestPaths;
-
+use Doctrine\DBAL\Logging\EchoSQLLogger;
 
 return [
     'doctrine' => [
@@ -37,7 +37,8 @@ return [
                 'datetime_functions' => [],
                 'string_functions' => [],
                 'numeric_functions' => [],
-                'second_level_cache' => []
+                'second_level_cache' => [],
+                //'sqlLogger' => 'testDoctrineLogger'
             ]
         ],
         'driver' => [
@@ -55,4 +56,9 @@ return [
             ]
         ]
     ],
+    'service_manager' => [
+        'invokables' => [
+            'testDoctrineLogger' => EchoSQLLogger::class
+        ]
+    ]
 ];

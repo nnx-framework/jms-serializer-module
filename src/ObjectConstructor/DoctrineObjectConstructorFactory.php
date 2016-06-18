@@ -5,13 +5,14 @@
  */
 namespace Nnx\JmsSerializerModule\ObjectConstructor;
 
+use Nnx\JmsSerializerModule\DoctrineObjectEngine\DoctrineObjectEngineInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use JMS\Serializer\Construction\ObjectConstructorInterface;
-use JMS\Serializer\Construction\DoctrineObjectConstructor;
+
 
 /**
  * Class DoctrineObjectConstructorFactory
@@ -65,6 +66,10 @@ class DoctrineObjectConstructorFactory implements FactoryInterface, MutableCreat
             throw new Exception\RuntimeException($errMsg);
         }
 
-        return new DoctrineObjectConstructor($managerRegistry, $fallbackConstructor);
+        /** @var DoctrineObjectEngineInterface $doctrineObjectEngine */
+        $doctrineObjectEngine = $serviceLocator->get(DoctrineObjectEngineInterface::class);
+
+
+        return new DoctrineObjectConstructor($managerRegistry, $fallbackConstructor, $doctrineObjectEngine);
     }
 }

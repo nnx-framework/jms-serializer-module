@@ -5,7 +5,7 @@
  */
 namespace Nnx\JmsSerializerModule;
 
-use JMS\Serializer\Construction\DoctrineObjectConstructor;
+use Nnx\JmsSerializerModule\ObjectConstructor\DoctrineObjectConstructor;
 use Metadata\MetadataFactory;
 use Metadata\Driver\DriverChain;
 use Metadata\ClassHierarchyMetadata;
@@ -20,6 +20,10 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use JMS\Serializer;
 use JMS\Serializer\Naming;
+use JMS\Serializer\Handler;
+use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
+use Nnx\JmsSerializerModule\EventDispatcher as EventDispatcherSubscriber;
+use Nnx\JmsSerializerModule\DoctrineObjectEngine;
 
 return [
     Module::CONFIG_KEY => [
@@ -52,6 +56,7 @@ return [
                 'name'    => DriverChain::class,
                 'options' => [
                     'drivers' => [
+                        'DoctrineTypeAnnotationDriver' => 'nnxJmsSerializer.metadataDriver.defaultDoctrineTypeAnnotationDriver',
                         'annotationDriver' => 'nnxJmsSerializer.metadataDriver.defaultAnnotationDriver',
                         'phpDriver'        => 'nnxJmsSerializer.metadataDriver.defaultPhpDriver',
                         'xmlDriver'        => 'nnxJmsSerializer.metadataDriver.defaultXmlDriver',
@@ -63,6 +68,13 @@ return [
                 'name'    => LazyLoadingDriver::class,
                 'options' => [
                     'realDriverId' => 'nnxJmsSerializer.metadataDriver.defaultDriversChain'
+                ]
+            ],
+            'defaultDoctrineTypeAnnotationDriver' => [
+                'name'    => JmsSerializerMetadataDriver\DoctrineTypeDriver::class,
+                'options' => [
+                    'delegate' => 'nnxJmsSerializer.metadataDriver.defaultAnnotationDriver',
+                    'managerRegistry'     => ManagerRegistry::class,
                 ]
             ],
             'defaultAnnotationDriver' => [
@@ -115,8 +127,10 @@ return [
             'default' => [
                 'name'    => HandlerRegistry::class,
                 'options' => [
-                    'handlers' => [
-
+                    'subscribers' => [
+                        Handler\ArrayCollectionHandler::class => Handler\ArrayCollectionHandler::class,
+                        Handler\DateHandler::class => Handler\DateHandler::class,
+                        Handler\PhpCollectionHandler::class => Handler\PhpCollectionHandler::class
                     ]
                 ]
 
@@ -219,12 +233,14 @@ return [
                 'name'    => EventDispatcher::class,
                 'options' => [
                     'subscribers' => [
-
+                        DoctrineProxySubscriber::class => DoctrineProxySubscriber::class,
+                        EventDispatcherSubscriber\XmlDoctrineObjectConstructorSubscriber::class => EventDispatcherSubscriber\XmlDoctrineObjectConstructorSubscriber::class
                     ]
                 ]
             ]
         ],
-        'annotationCache'         => 'doctrine.cache.array'
+        'annotationCache'         => 'doctrine.cache.array',
+        'entityLocator' => DoctrineObjectEngine\EntityLocator::class
     ]
 ];
 

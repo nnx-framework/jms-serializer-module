@@ -164,6 +164,13 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
     protected $namingStrategiesOptions = [];
 
     /**
+     * Контейнер для получения сущностей
+     *
+     * @var string
+     */
+    protected $entityLocator;
+
+    /**
      * Устанавливает информацию о сериалайзерах
      *
      * @param array $serializer
@@ -739,5 +746,29 @@ class ModuleOptions extends AbstractOptions implements ModuleOptionsInterface
         $this->namingStrategiesOptions[$strategyName] = new PluginOptions($this->namingStrategies[$strategyName]);
 
         return $this->namingStrategiesOptions[$strategyName];
+    }
+
+    /**
+     * Возвращает контейнер для получения сущностей
+     *
+     * @return string
+     */
+    public function getEntityLocator()
+    {
+        return $this->entityLocator;
+    }
+
+    /**
+     * Устанавливает контейнер для получения сущностей
+     *
+     * @param string $entityLocator
+     *
+     * @return $this
+     */
+    public function setEntityLocator($entityLocator)
+    {
+        $this->entityLocator = $entityLocator;
+
+        return $this;
     }
 }

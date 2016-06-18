@@ -35,6 +35,9 @@ class DefaultAnnotationReaderFactory implements FactoryInterface
     {
         $appServiceLocator = $serviceLocator instanceof AbstractPluginManager ? $serviceLocator->getServiceLocator() : $serviceLocator;
 
+//        AnnotationRegistry::registerLoader(function ($class) {
+//            return (bool) class_exists($class);
+//        });
         $reader = new AnnotationReader();
         $indexedReader = new IndexedReader($reader);
 
