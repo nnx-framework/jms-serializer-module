@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result>
+  <id>1</id>
+  <isbn><![CDATA[123456789]]></isbn>
+  <date_of_publication><![CDATA[2016-06-17T08:37:01+0300]]></date_of_publication>
+  <title><![CDATA[Test Book]]></title>
+  <authors>
+    <entry>
+      <id>1</id>
+      <name><![CDATA[Ivan]]></name>
+      <family_name><![CDATA[Ivanov]]></family_name>
+      <address>
+        <id>1</id>
+        <city><![CDATA[Nigniy Novgorod]]></city>
+        <street><![CDATA[Poltavskay]]></street>
+      </address>
+      <books>
+        <entry/>
+      </books>
+    </entry>
+    <entry>
+      <id>2</id>
+      <name><![CDATA[Petr]]></name>
+      <family_name><![CDATA[Petrov]]></family_name>
+      <address>
+        <id>2</id>
+        <city><![CDATA[Moscow]]></city>
+        <street><![CDATA[Arbat]]></street>
+      </address>
+      <books>
+        <entry/>
+      </books>
+    </entry>
+  </authors>
+</result>

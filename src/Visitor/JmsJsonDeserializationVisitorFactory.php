@@ -5,18 +5,18 @@
  */
 namespace Nnx\JmsSerializerModule\Visitor;
 
-
+use JMS\Serializer\JsonDeserializationVisitor;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
- * Class JsonDeserializationVisitorFactory
+ * Class JmsJsonDeserializationVisitorFactory
  *
  * @package Nnx\JmsSerializerModule\Visitor
  */
-class JsonDeserializationVisitorFactory implements FactoryInterface, MutableCreationOptionsInterface
+class JmsJsonDeserializationVisitorFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
     use MutableCreationOptionsTrait, NamingStrategyTrait;
 

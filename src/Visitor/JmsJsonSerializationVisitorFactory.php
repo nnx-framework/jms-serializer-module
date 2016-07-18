@@ -13,11 +13,11 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 use Metadata\Driver\FileLocator;
 
 /**
- * Class FileLocatorFactory
+ * Class JmsJsonSerializationVisitorFactory
  *
  * @package Nnx\JmsSerializerModule\Visitor
  */
-class JsonSerializationVisitorFactory implements FactoryInterface, MutableCreationOptionsInterface
+class JmsJsonSerializationVisitorFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
     use MutableCreationOptionsTrait, NamingStrategyTrait;
 

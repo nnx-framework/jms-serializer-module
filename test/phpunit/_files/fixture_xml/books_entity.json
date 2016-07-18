@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "isbn": "123456789",
+    "date_of_publication": "2016-06-17T08:37:01+0300",
+    "title": "Test Book",
+    "authors": [
+      {
+        "id": 1,
+        "name": "Ivan",
+        "family_name": "Ivanov",
+        "address": {
+          "id": 1,
+          "city": "Nigniy Novgorod",
+          "street": "Poltavskay"
+        },
+        "books": []
+      },
+      {
+        "id": 2,
+        "name": "Petr",
+        "family_name": "Petrov",
+        "address": {
+          "id": 2,
+          "city": "Moscow",
+          "street": "Arbat"
+        },
+        "books": []
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "isbn": "987654321",
+    "date_of_publication": "2016-06-17T08:37:01+0300",
+    "title": "Test Book - 2",
+    "authors": [
+      {
+        "id": 3,
+        "name": "Vasiliy",
+        "family_name": "Vasiliev",
+        "address": {
+          "id": 2,
+          "city": "Moscow",
+          "street": "Arbat"
+        },
+        "books": []
+      }
+    ]
+  }
+]

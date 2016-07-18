@@ -20,10 +20,12 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use JMS\Serializer;
 use JMS\Serializer\Naming;
-use JMS\Serializer\Handler;
+use JMS\Serializer\Handler as JmsHandler;
+use Nnx\JmsSerializerModule\Handler;
 use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
 use Nnx\JmsSerializerModule\EventDispatcher as EventDispatcherSubscriber;
 use Nnx\JmsSerializerModule\DoctrineObjectEngine;
+use Nnx\JmsSerializerModule\Visitor;
 
 return [
     Module::CONFIG_KEY => [
@@ -52,19 +54,19 @@ return [
             ]
         ],
         'metadataDrivers'         => [
-            'defaultDriversChain'     => [
+            'defaultDriversChain'                 => [
                 'name'    => DriverChain::class,
                 'options' => [
                     'drivers' => [
                         'DoctrineTypeAnnotationDriver' => 'nnxJmsSerializer.metadataDriver.defaultDoctrineTypeAnnotationDriver',
-                        'annotationDriver' => 'nnxJmsSerializer.metadataDriver.defaultAnnotationDriver',
-                        'phpDriver'        => 'nnxJmsSerializer.metadataDriver.defaultPhpDriver',
-                        'xmlDriver'        => 'nnxJmsSerializer.metadataDriver.defaultXmlDriver',
-                        'yamlDriver'       => 'nnxJmsSerializer.metadataDriver.defaultYamlDriver'
+                        'annotationDriver'             => 'nnxJmsSerializer.metadataDriver.defaultAnnotationDriver',
+                        'phpDriver'                    => 'nnxJmsSerializer.metadataDriver.defaultPhpDriver',
+                        'xmlDriver'                    => 'nnxJmsSerializer.metadataDriver.defaultXmlDriver',
+                        'yamlDriver'                   => 'nnxJmsSerializer.metadataDriver.defaultYamlDriver'
                     ]
                 ]
             ],
-            'default'                 => [
+            'default'                             => [
                 'name'    => LazyLoadingDriver::class,
                 'options' => [
                     'realDriverId' => 'nnxJmsSerializer.metadataDriver.defaultDriversChain'
@@ -73,30 +75,30 @@ return [
             'defaultDoctrineTypeAnnotationDriver' => [
                 'name'    => JmsSerializerMetadataDriver\DoctrineTypeDriver::class,
                 'options' => [
-                    'delegate' => 'nnxJmsSerializer.metadataDriver.defaultAnnotationDriver',
-                    'managerRegistry'     => ManagerRegistry::class,
+                    'delegate'        => 'nnxJmsSerializer.metadataDriver.defaultAnnotationDriver',
+                    'managerRegistry' => ManagerRegistry::class,
                 ]
             ],
-            'defaultAnnotationDriver' => [
+            'defaultAnnotationDriver'             => [
                 'name'    => JmsSerializerMetadataDriver\AnnotationDriver::class,
                 'options' => [
                     /** @see \Nnx\JmsSerializerModule\MetadataReader\DefaultAnnotationReaderFactory */
                     'reader' => 'defaultAnnotationReader'
                 ]
             ],
-            'defaultPhpDriver'        => [
+            'defaultPhpDriver'                    => [
                 'name'    => JmsSerializerMetadataDriver\PhpDriver::class,
                 'options' => [
                     'fileLocator' => 'nnxJmsSerializer.fileLocators.defaultPhpDriver'
                 ]
             ],
-            'defaultYamlDriver'       => [
+            'defaultYamlDriver'                   => [
                 'name'    => JmsSerializerMetadataDriver\YamlDriver::class,
                 'options' => [
                     'fileLocator' => 'nnxJmsSerializer.fileLocators.defaultYamlDriver'
                 ]
             ],
-            'defaultXmlDriver'        => [
+            'defaultXmlDriver'                    => [
                 'name'    => JmsSerializerMetadataDriver\XmlDriver::class,
                 'options' => [
                     'fileLocator' => 'nnxJmsSerializer.fileLocators.defaultXmlDriver'
@@ -128,9 +130,9 @@ return [
                 'name'    => HandlerRegistry::class,
                 'options' => [
                     'subscribers' => [
-                        Handler\ArrayCollectionHandler::class => Handler\ArrayCollectionHandler::class,
-                        Handler\DateHandler::class => Handler\DateHandler::class,
-                        Handler\PhpCollectionHandler::class => Handler\PhpCollectionHandler::class
+                        Handler\ArrayCollectionHandler::class  => Handler\ArrayCollectionHandler::class,
+                        JmsHandler\DateHandler::class          => JmsHandler\DateHandler::class,
+                        JmsHandler\PhpCollectionHandler::class => JmsHandler\PhpCollectionHandler::class
                     ]
                 ]
 
@@ -151,81 +153,89 @@ return [
                 ]
             ]
         ],
-        'namingStrategies' => [
+        'namingStrategies'        => [
             'cachedSerializedNameAnnotation' => [
-                'name' => Naming\CacheNamingStrategy::class,
+                'name'    => Naming\CacheNamingStrategy::class,
                 'options' => [
                     'delegate' => 'nnxJmsSerializer.namingStrategies.serializedNameAnnotation'
                 ]
             ],
-            'serializedNameAnnotation' => [
-                'name' => Naming\SerializedNameAnnotationStrategy::class,
+            'serializedNameAnnotation'       => [
+                'name'    => Naming\SerializedNameAnnotationStrategy::class,
                 'options' => [
                     'delegate' => 'nnxJmsSerializer.namingStrategies.camelCaseNaming'
                 ]
             ],
-            'identicalNaming' => [
-                'name' => Naming\IdenticalPropertyNamingStrategy::class,
+            'identicalNaming'                => [
+                'name'    => Naming\IdenticalPropertyNamingStrategy::class,
                 'options' => []
             ],
-            'camelCaseNaming' => [
-                'name' => Naming\CamelCaseNamingStrategy::class,
+            'camelCaseNaming'                => [
+                'name'    => Naming\CamelCaseNamingStrategy::class,
                 'options' => [
                     'separator' => '_',
                     'lowerCase' => true
                 ]
             ]
         ],
-        'visitors' => [
-            'jsonSerializationVisitor' => [
-                'name' => Serializer\JsonSerializationVisitor::class,
+        'visitors'                => [
+            'jsonSerializationVisitor'             => [
+                'name'    => Serializer\JsonSerializationVisitor::class,
                 'options' => [
                     'namingStrategy' => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation',
-                    'jsonOptions' => [
+                    'jsonOptions'    => [
                         'options' => 0
                     ]
                 ]
             ],
-            'xmlSerializationVisitor' => [
-                'name' => Serializer\XmlSerializationVisitor::class,
+            'xmlSerializationVisitor'              => [
+                'name'    => Serializer\XmlSerializationVisitor::class,
                 'options' => [
                     'namingStrategy' => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation',
                 ]
 
             ],
-            'yamlSerializationVisitor' => [
-                'name' => Serializer\YamlSerializationVisitor::class,
+            'yamlSerializationVisitor'             => [
+                'name'    => Serializer\YamlSerializationVisitor::class,
                 'options' => [
                     'namingStrategy' => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation',
                 ]
             ],
-            'jsonDeserializationVisitor' => [
-                'name' => Serializer\JsonDeserializationVisitor::class,
+            'jsonDeserializationVisitor'           => [
+                'name'    => Visitor\JsonDeserializationVisitor::class,
                 'options' => [
                     'namingStrategy' => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation',
                 ]
             ],
-            'xmlDeserializationVisitor' => [
-                'name' => Serializer\XmlDeserializationVisitor::class,
+            'xmlDeserializationVisitor'            => [
+                'name'    => Serializer\XmlDeserializationVisitor::class,
                 'options' => [
-                    'namingStrategy' => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation',
+                    'namingStrategy'   => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation',
                     'doctypeWhitelist' => [
 
                     ]
+                ]
+            ],
+            'xmlDeserializationForDoctrineVisitor' => [
+                'name'    => Visitor\XmlDeserializationForDoctrineVisitor::class,
+                'options' => [
+                    'namingStrategy' => 'nnxJmsSerializer.namingStrategies.cachedSerializedNameAnnotation'
                 ]
             ]
         ],
         'serializationVisitors'   => [
             'default' => [
                 'json' => 'nnxJmsSerializer.visitors.jsonSerializationVisitor',
-                'xml'  => 'nnxJmsSerializer.visitors.xmlSerializationVisitor',
-                'yml'  => 'nnxJmsSerializer.visitors.yamlSerializationVisitor',
+
+                'xml' => 'nnxJmsSerializer.visitors.xmlSerializationVisitor',
+                'yml' => 'nnxJmsSerializer.visitors.yamlSerializationVisitor',
             ]
         ],
         'deserializationVisitors' => [
             'default' => [
-                'json' => 'nnxJmsSerializer.visitors.jsonDeserializationVisitor',
-                'xml'  => 'nnxJmsSerializer.visitors.xmlDeserializationVisitor',
+                'json'           => 'nnxJmsSerializer.visitors.jsonDeserializationVisitor',
+                'xml'            => 'nnxJmsSerializer.visitors.xmlDeserializationVisitor',
+                'xmlForDoctrine' => 'nnxJmsSerializer.visitors.xmlDeserializationForDoctrineVisitor',
             ]
         ],
         'eventDispatchers'        => [
@@ -233,14 +243,13 @@ return [
                 'name'    => EventDispatcher::class,
                 'options' => [
                     'subscribers' => [
-                        DoctrineProxySubscriber::class => DoctrineProxySubscriber::class,
-                        EventDispatcherSubscriber\XmlDoctrineObjectConstructorSubscriber::class => EventDispatcherSubscriber\XmlDoctrineObjectConstructorSubscriber::class
+                        DoctrineProxySubscriber::class => DoctrineProxySubscriber::class
                     ]
                 ]
             ]
         ],
         'annotationCache'         => 'doctrine.cache.array',
-        'entityLocator' => DoctrineObjectEngine\EntityLocator::class
+        'entityLocator'           => DoctrineObjectEngine\EntityLocator::class
     ]
 ];
 

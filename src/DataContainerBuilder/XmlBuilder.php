@@ -6,10 +6,8 @@
 namespace Nnx\JmsSerializerModule\DataContainerBuilder;
 
 use Nnx\JmsSerializerModule\DataContainer;
-use Ramsey\Uuid\Uuid;
+use LibXMLError;
 use SimpleXMLElement;
-
-
 
 /**
  * Class ManagerRegistryFactory
@@ -39,79 +37,11 @@ class XmlBuilder implements XmlBuilderInterface
      */
     protected $childEntryQuery;
 
-    /**
-     * Ключем является хеш SimpleXMLElement, а значением закешированные данные
-     *
-     * @var array
-     */
-    protected $itemNodeUuidToCacheData = [];
-
-    /**
-     * Имя атрибута для того что бы связать SimpleXMLElement и контейнер с данными
-     *
-     * @var string
-     */
-    protected $defaultUuidAttribute = '____UUID____';
-
-    /**
-     * Определяет есть ли готовые данные для данного элемента
-     *
-     * @param SimpleXMLElement $resource
-     *
-     * @return boolean
-     * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
-     */
-    public function hasDataInCache(SimpleXMLElement $resource)
-    {
-        if ($this->hasUuidAttribute($resource)) {
-            $uuid = $this->getUuidAttribute($resource);
-            return array_key_exists($uuid, $this->itemNodeUuidToCacheData);
-        }
-        return false;
-    }
-
-    /**
-     * Возвращает контейнер с данными из кеша
-     *
-     * @param SimpleXMLElement $resource
-     *
-     * @return DataContainer\DataContainerInterface
-     * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
-     */
-    public function getDataContainerFromCache(SimpleXMLElement $resource)
-    {
-        if (!$this->hasDataInCache($resource)) {
-            $errMsg = 'Data container not found';
-            throw new Exception\RuntimeException($errMsg);
-        }
-
-        $uuid = $this->getUuidAttribute($resource);
-        return $this->itemNodeUuidToCacheData[$uuid]['dataContainer'];
-    }
-
-    /**
-     * Возвращает контейнер с данными для сущности
-     *
-     * @param SimpleXMLElement $resource
-     *
-     * @return DataContainer\EntityInterface
-     * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
-     */
-    public function getEntityFromCache(SimpleXMLElement $resource)
-    {
-        if (!$this->hasDataInCache($resource)) {
-            $errMsg = 'Entity not found';
-            throw new Exception\RuntimeException($errMsg);
-        }
-
-        $uuid = $this->getUuidAttribute($resource);
-        return $this->itemNodeUuidToCacheData[$uuid]['entity'];
-    }
 
     /**
      * Подготавливает нормализованный контейнер с данными на основе узла SimpleXMLElement
      *
-     * @param SimpleXMLElement $resource
+     * @param string $resource
      *
      * @return DataContainer\DataContainerInterface
      * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
@@ -119,20 +49,15 @@ class XmlBuilder implements XmlBuilderInterface
      * @throws \Nnx\JmsSerializerModule\DataContainer\Exception\InvalidArgumentException
      * @throws Exception\InvalidResourceException
      */
-    public function loadDataFromResource(SimpleXMLElement $resource)
+    public function loadDataFromResource($resource)
     {
-        if ($this->hasUuidAttribute($resource)) {
-            $uuid = $this->getUuidAttribute($resource);
-            if (array_key_exists($uuid, $this->itemNodeUuidToCacheData)) {
-                return $this->itemNodeUuidToCacheData[$uuid]['dataContainer'];
-            }
-        }
+        $xml = $this->buildXmlFromString($resource);
 
         $query = sprintf('/descendant-or-self::%s/%s', $this->getDefaultRootName(), $this->getXmlEntryName());
-        $itemNodes = $resource->xpath($query);
+        $itemNodes = $xml->xpath($query);
 
         if (0 === count($itemNodes)) {
-            $itemNodes = $resource->xpath('.');
+            $itemNodes = $xml->xpath('.');
         }
 
 
@@ -150,7 +75,31 @@ class XmlBuilder implements XmlBuilderInterface
         return $dataContainer;
     }
 
+    /**
+     * На основе строки, подготавливает SimpleXMLElement
+     *
+     * @param $xmlString
+     *
+     * @return SimpleXMLElement
+     * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
+     */
+    protected function buildXmlFromString($xmlString)
+    {
 
+        $previous = libxml_use_internal_errors(true);
+        $previousEntityLoaderState = libxml_disable_entity_loader(true);
+
+        $xml = simplexml_load_string($xmlString);
+        libxml_use_internal_errors($previous);
+        libxml_disable_entity_loader($previousEntityLoaderState);
+
+        $err = libxml_get_last_error();
+        if ($err instanceof LibXMLError) {
+            throw new Exception\RuntimeException($err->message);
+        }
+
+        return $xml;
+    }
     /**
      * Обработка набора узлов xml документа, в которых описываются данные для сущности
      *
@@ -183,19 +132,6 @@ class XmlBuilder implements XmlBuilderInterface
 
             $entity = new DataContainer\Entity();
             $entity->setLevel($level);
-
-
-            if (!$this->hasUuidAttribute($itemNode)) {
-                $this->generateUuid($itemNode);
-            }
-            $currentUuid = $this->getUuidAttribute($itemNode);
-
-            if (!array_key_exists($currentUuid, $this->itemNodeUuidToCacheData)) {
-                $this->itemNodeUuidToCacheData[$currentUuid] = [
-                    'entity' => $entity,
-                    'dataContainer' => $dataContainer
-                ];
-            }
 
 
             if (null !== $parentEntity) {
@@ -258,61 +194,6 @@ class XmlBuilder implements XmlBuilderInterface
         }
     }
 
-    /**
-     * Определяет есть ли uuid атрибут у элемента
-     *
-     * @param SimpleXMLElement $itemNode
-     *
-     * @return bool
-     */
-    public function hasUuidAttribute(SimpleXMLElement $itemNode)
-    {
-        $uuidAttribute = $this->getDefaultUuidAttribute();
-        $attributesItemNode = $itemNode->attributes();
-        return isset($attributesItemNode[$uuidAttribute]);
-    }
-
-
-    /**
-     * Определяет есть ли uuid атрибут у элемента
-     *
-     * @param SimpleXMLElement $itemNode
-     *
-     * @return string
-     * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
-     */
-    public function getUuidAttribute(SimpleXMLElement $itemNode)
-    {
-        if (!$this->hasUuidAttribute($itemNode)) {
-            $errMsg = sprintf('Uuid attribute not found in %s', $itemNode->getName());
-            throw new Exception\RuntimeException($errMsg);
-        }
-
-        $uuidAttribute = $this->getDefaultUuidAttribute();
-        return (string)$itemNode[$uuidAttribute];
-    }
-
-    /**
-     * Генерирует uuid атррибут
-     *
-     * @param SimpleXMLElement $itemNode
-     *
-     * @return SimpleXMLElement
-     * @throws \Nnx\JmsSerializerModule\DataContainerBuilder\Exception\RuntimeException
-     */
-    public function generateUuid(SimpleXMLElement $itemNode)
-    {
-        if ($this->hasUuidAttribute($itemNode)) {
-            $errMsg = sprintf('Uuid attribute already exists %s', $itemNode->getName());
-            throw new Exception\RuntimeException($errMsg);
-        }
-
-        $uuidAttribute = $this->getDefaultUuidAttribute();
-        $uuid = Uuid::uuid4()->toString();
-        $itemNode->addAttribute($uuidAttribute, $uuid);
-
-        return $itemNode;
-    }
 
     /**
      * Возвращает имя корневого тега по умолчанию
@@ -376,27 +257,4 @@ class XmlBuilder implements XmlBuilderInterface
         return $this->childEntryQuery;
     }
 
-    /**
-     * Возвращает имя атрибута для того что бы связать SimpleXMLElement и контейнер с данными
-     *
-     * @return string
-     */
-    public function getDefaultUuidAttribute()
-    {
-        return $this->defaultUuidAttribute;
-    }
-
-    /**
-     * Устанавливает имя атрибута для того что бы связать SimpleXMLElement и контейнер с данными
-     *
-     * @param string $defaultUuidAttribute
-     *
-     * @return $this
-     */
-    public function setDefaultUuidAttribute($defaultUuidAttribute)
-    {
-        $this->defaultUuidAttribute = $defaultUuidAttribute;
-
-        return $this;
-    }
 }

@@ -6,8 +6,6 @@
 namespace Nnx\JmsSerializerModule\DataContainerBuilder;
 
 use Nnx\JmsSerializerModule\DataContainer\DataContainerInterface;
-use Nnx\JmsSerializerModule\DataContainer\EntityInterface;
-use SimpleXMLElement;
 
 /**
  * Interface XmlBuilderInterface
@@ -17,38 +15,12 @@ use SimpleXMLElement;
 interface XmlBuilderInterface
 {
     /**
-     * Подготавливает нормализованный контейнер с данными на основе узла SimpleXMLElement
+     * Подготавливает нормализованный контейнер с данными на основе строки с данными
      *
      * @param $resource
      *
      * @return DataContainerInterface
      */
-    public function loadDataFromResource(SimpleXMLElement $resource);
+    public function loadDataFromResource($resource);
 
-    /**
-     * Определяет есть ли готовые данные для данного элемента
-     *
-     * @param SimpleXMLElement $resource
-     *
-     * @return boolean
-     */
-    public function hasDataInCache(SimpleXMLElement $resource);
-
-    /**
-     * Возвращает контейнер с данными из кеша
-     *
-     * @param SimpleXMLElement $resource
-     *
-     * @return DataContainerInterface
-     */
-    public function getDataContainerFromCache(SimpleXMLElement $resource);
-
-    /**
-     * Возвращает контейнер с данными для сущности
-     *
-     * @param SimpleXMLElement $resource
-     *
-     * @return EntityInterface
-     */
-    public function getEntityFromCache(SimpleXMLElement $resource);
 }

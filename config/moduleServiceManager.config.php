@@ -23,7 +23,8 @@ use Nnx\JmsSerializerModule\NamingStrategy;
 use JMS\Serializer\Naming as JmsNamingStrategy;
 use Nnx\JmsSerializerModule\EventDispatcher;
 use JMS\Serializer\EventDispatcher\EventDispatcher as JmsEventDispatcher;
-use JMS\Serializer\Handler;
+use JMS\Serializer\Handler as JmsHandler;
+use Nnx\JmsSerializerModule\Handler;
 use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
 use Nnx\JmsSerializerModule\DataContainerBuilder;
 use Nnx\JmsSerializerModule\DoctrineObjectEngine;
@@ -36,8 +37,8 @@ return [
         'invokables'         => [
             Construction\UnserializeObjectConstructor::class => Construction\UnserializeObjectConstructor::class,
             Handler\ArrayCollectionHandler::class            => Handler\ArrayCollectionHandler::class,
-            Handler\DateHandler::class                       => Handler\DateHandler::class,
-            Handler\PhpCollectionHandler::class              => Handler\PhpCollectionHandler::class,
+            JmsHandler\DateHandler::class                    => JmsHandler\DateHandler::class,
+            JmsHandler\PhpCollectionHandler::class           => JmsHandler\PhpCollectionHandler::class,
             DoctrineProxySubscriber::class                   => DoctrineProxySubscriber::class,
 
             DataContainerBuilder\XmlBuilderInterface::class => DataContainerBuilder\XmlBuilder::class
@@ -55,11 +56,14 @@ return [
             JmsHandlerRegistry::class                          => HandlerRegistry\HandlerRegistryFactory::class,
             ManagerRegistry::class                             => Util\ManagerRegistryFactory::class,
             ObjectConstructor\DoctrineObjectConstructor::class => ObjectConstructor\DoctrineObjectConstructorFactory::class,
-            Serializer\JsonSerializationVisitor::class         => Visitor\JsonSerializationVisitorFactory::class,
+            Serializer\JsonSerializationVisitor::class         => Visitor\JmsJsonSerializationVisitorFactory::class,
             Serializer\XmlSerializationVisitor::class          => Visitor\XmlSerializationVisitorFactory::class,
             Serializer\YamlSerializationVisitor::class         => Visitor\YamlSerializationVisitorFactory::class,
-            Serializer\JsonDeserializationVisitor::class       => Visitor\JsonDeserializationVisitorFactory::class,
+            Serializer\JsonDeserializationVisitor::class       => Visitor\JmsJsonDeserializationVisitorFactory::class,
             Serializer\XmlDeserializationVisitor::class        => Visitor\XmlDeserializationVisitorFactory::class,
+
+            Visitor\XmlDeserializationForDoctrineVisitor::class => Visitor\XmlDeserializationForDoctrineVisitorFactory::class,
+            Visitor\JsonDeserializationVisitor::class           => Visitor\JsonDeserializationVisitorFactory::class,
 
             JmsNamingStrategy\CacheNamingStrategy::class              => NamingStrategy\CacheNamingStrategyFactory::class,
             JmsNamingStrategy\SerializedNameAnnotationStrategy::class => NamingStrategy\SerializedNameAnnotationStrategyFactory::class,
@@ -67,8 +71,6 @@ return [
             JmsNamingStrategy\CamelCaseNamingStrategy::class          => NamingStrategy\CamelCaseNamingStrategyFactory::class,
 
             JmsEventDispatcher::class => EventDispatcher\EventDispatcherFactory::class,
-
-            EventDispatcher\XmlDoctrineObjectConstructorSubscriber::class => EventDispatcher\XmlDoctrineObjectConstructorSubscriberFactory::class,
 
             DoctrineObjectEngine\DoctrineObjectEngineInterface::class => DoctrineObjectEngine\DoctrineObjectEngineFactory::class,
             DoctrineObjectEngine\MetadataBuilderInterface::class      => DoctrineObjectEngine\MetadataBuilderFactory::class,

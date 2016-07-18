@@ -5,25 +5,26 @@
  */
 namespace Nnx\JmsSerializerModule\Visitor;
 
-
+use JMS\Serializer\XmlDeserializationVisitor;
+use Nnx\JmsSerializerModule\DataContainerBuilder\XmlBuilderInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
- * Class JsonDeserializationVisitorFactory
+ * Class XmlDeserializationForDoctrineVisitorFactory
  *
  * @package Nnx\JmsSerializerModule\Visitor
  */
-class JsonDeserializationVisitorFactory implements FactoryInterface, MutableCreationOptionsInterface
+class XmlDeserializationForDoctrineVisitorFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
     use MutableCreationOptionsTrait, NamingStrategyTrait;
 
     /**
      * @param ServiceLocatorInterface $serviceLocator
      *
-     * @return JsonDeserializationVisitor
+     * @return XmlDeserializationVisitor
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      * @throws \Nnx\JmsSerializerModule\Visitor\Exception\RuntimeException
      */
@@ -31,6 +32,9 @@ class JsonDeserializationVisitorFactory implements FactoryInterface, MutableCrea
     {
         $namingStrategy = $this->getNamingStrategyFromContainer($serviceLocator);
 
-        return new JsonDeserializationVisitor($namingStrategy);
+        /** @var XmlBuilderInterface $dataContainerFromXmlBuilder */
+        $dataContainerFromXmlBuilder = $serviceLocator->get(XmlBuilderInterface::class);
+
+        return new XmlDeserializationForDoctrineVisitor($namingStrategy, $dataContainerFromXmlBuilder);
     }
 }

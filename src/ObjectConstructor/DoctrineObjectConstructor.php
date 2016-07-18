@@ -11,6 +11,7 @@ use JMS\Serializer\VisitorInterface;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\DeserializationContext;
 use Nnx\JmsSerializerModule\DoctrineObjectEngine\DoctrineObjectEngineInterface;
+use Nnx\JmsSerializerModule\DataContainer\DataContainerInterface;
 
 /**
  * Class DoctrineObjectConstructor
@@ -79,7 +80,7 @@ class DoctrineObjectConstructor implements ObjectConstructorInterface
     public function construct(VisitorInterface $visitor, ClassMetadata $metadata, $data, array $type, DeserializationContext $context)
     {
         $fallbackConstructor = $this->getFallbackConstructor();
-        if (!$data instanceof DoctrineObjectConstructor\DataInterface) {
+        if (!$data instanceof DataContainerInterface) {
             return $fallbackConstructor->construct($visitor, $metadata, $data, $type, $context);
         }
 
@@ -99,19 +100,22 @@ class DoctrineObjectConstructor implements ObjectConstructorInterface
             return $fallbackConstructor->construct($visitor, $metadata, $data, $type, $context);
         }
 
-        $dataContainer = $data->getDataContainer();
 
         $doctrineObjectEngine = $this->getDoctrineObjectEngine();
-        $dataContainerId = $dataContainer->getId();
+        $dataContainerId = $data->getId();
         if (!array_key_exists($dataContainerId, $this->finishedDataContainerId)) {
-            $doctrineObjectEngine->import($dataContainer, $metadata->name, $objectManager);
+            $doctrineObjectEngine->import($data, $metadata->name, $objectManager);
             $objectManager->flush();
             $this->finishedDataContainerId[$dataContainerId] = $dataContainerId;
         }
 
-        $entity = $data->getEntity();
+        $results = [];
+        $entities = $data->getEntities();
+        foreach ($entities as $entity) {
+            $results[] = $doctrineObjectEngine->getDoctrineEntityByDataContainer($entity);
+        }
 
-        return $doctrineObjectEngine->getDoctrineEntityByDataContainer($entity);
+        return $results;
     }
 
     /**

@@ -5,6 +5,7 @@
  */
 namespace Nnx\JmsSerializerModule\PhpUnit\Test;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Nnx\JmsSerializerModule\PhpUnit\TestData\TestPaths;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -137,15 +138,17 @@ class SerializerTest extends AbstractHttpControllerTestCase
         $data = $jmsSerializer->serialize($books, 'xml');
 
         static::assertXmlStringEqualsXmlFile(TestPaths::getPathToFixtureXmlDir() . 'books_entity.xml', $data);
+
+        file_put_contents(TestPaths::getPathToFixtureXmlDir() . 'book_entity.xml', $jmsSerializer->serialize($book1, 'xml'));
     }
 
 
     /**
-     * Проверка десериализации данных
+     * Проверка десериализации данных и получение \Doctrine\Common\Collections\ArrayCollection
      *
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      */
-    public function testDeserialize()
+    public function testDeserializeXmlToArrayCollection()
     {
 
         /** @var ServiceLocatorInterface $serializerAdapterManager */
@@ -158,9 +161,84 @@ class SerializerTest extends AbstractHttpControllerTestCase
         $result = $jmsSerializer->unserialize(
             $xmlData,
             'ArrayCollection<Nnx\JmsSerializerModule\PhpUnit\TestData\DefaultApp\TestModule1\Entity\Book>',
-            'xml'
+            'xmlForDoctrine'
         );
 
-        static::assertTrue(is_array($result));
+        static::assertInstanceOf(ArrayCollection::class, $result);
+    }
+
+
+    /**
+     * Проверка десериализации данных и получение массива
+     *
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     */
+    public function testDeserializeXmlToArray()
+    {
+
+        /** @var ServiceLocatorInterface $serializerAdapterManager */
+        $serializerAdapterManager = $this->getApplicationServiceLocator()->get('SerializerAdapterManager');
+
+        /** @var JmsSerializer $jmsSerializer */
+        $jmsSerializer = $serializerAdapterManager->get('nnxJmsSerializer.serializers.default');
+
+        $xmlData = file_get_contents(TestPaths::getPathToFixtureXmlDir() . 'books_entity.xml');
+        $result = $jmsSerializer->unserialize(
+            $xmlData,
+            'array<Nnx\JmsSerializerModule\PhpUnit\TestData\DefaultApp\TestModule1\Entity\Book>',
+            'xmlForDoctrine'
+        );
+
+        static::assertInternalType('array', $result);
+    }
+
+    /**
+     * Проверка десериализации данных и объекта
+     *
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     */
+    public function testDeserializeXmlToObject()
+    {
+
+        /** @var ServiceLocatorInterface $serializerAdapterManager */
+        $serializerAdapterManager = $this->getApplicationServiceLocator()->get('SerializerAdapterManager');
+
+        /** @var JmsSerializer $jmsSerializer */
+        $jmsSerializer = $serializerAdapterManager->get('nnxJmsSerializer.serializers.default');
+
+        $xmlData = file_get_contents(TestPaths::getPathToFixtureXmlDir() . 'book_entity.xml');
+        $result = $jmsSerializer->unserialize(
+            $xmlData,
+            'Nnx\JmsSerializerModule\PhpUnit\TestData\DefaultApp\TestModule1\Entity\Book',
+            'xmlForDoctrine'
+        );
+
+        static::assertInternalType('array', $result);
+    }
+
+
+
+    /**
+     * Проверка десериализации данных и получение массива
+     *
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     */
+    public function testDeserializeJsonToArray()
+    {
+
+        /** @var ServiceLocatorInterface $serializerAdapterManager */
+        $serializerAdapterManager = $this->getApplicationServiceLocator()->get('SerializerAdapterManager');
+
+        /** @var JmsSerializer $jmsSerializer */
+        $jmsSerializer = $serializerAdapterManager->get('nnxJmsSerializer.serializers.default');
+
+        $xmlData = file_get_contents(TestPaths::getPathToFixtureXmlDir() . 'books_entity.json');
+        $result = $jmsSerializer->unserialize(
+            $xmlData,
+            'array<Nnx\JmsSerializerModule\PhpUnit\TestData\DefaultApp\TestModule1\Entity\Book>',
+            'json'
+        );
+
+        static::assertInternalType('array', $result);
     }
 }
